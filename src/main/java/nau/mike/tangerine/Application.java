@@ -1,5 +1,6 @@
 package nau.mike.tangerine;
 
+import nau.mike.tangerine.engine.Camera;
 import nau.mike.tangerine.engine.Entity;
 import nau.mike.tangerine.engine.Mesh;
 import nau.mike.tangerine.engine.Window;
@@ -29,6 +30,7 @@ public class Application {
     1, 2, 3 // second triangle
   };
 
+  private Camera camera;
   private Entity entity;
   private Shader meshShader;
 
@@ -39,6 +41,7 @@ public class Application {
   }
 
   private void init() {
+    camera = new Camera();
     final Mesh mesh = new Mesh(new Vertex(vertices, uvs, indices));
     mesh.addTexture("awesomeface");
     entity = new Entity(mesh);
@@ -49,12 +52,13 @@ public class Application {
 
   private void update() {
     time++;
-    entity.setPosition((float) Math.sin(time), 0.0f, 0.0f);
+    camera.setPosition((float) Math.sin(time), 0.0f, 0.0f);
   }
 
   private void render() {
     meshShader.start();
     meshShader.loadModelMatrix(entity.getModelMatrix());
+    meshShader.loadViewMatrix(camera.getViewMatrix());
     entity.draw();
     meshShader.end();
   }

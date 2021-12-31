@@ -46,4 +46,21 @@ public class MathUtil {
     matrix.scale(scale);
     return matrix;
   }
+
+  public static Matrix4f createViewMatrix(final Vector3f position, final Vector3f rotation) {
+    final Matrix4f matrix = new Matrix4f().identity();
+    matrix
+        .rotateX((float) Math.toRadians(rotation.x))
+        .rotateY((float) Math.toRadians(rotation.y))
+        .rotateZ((float) Math.toRadians(rotation.z));
+    matrix.translation(-position.x, -position.y, -position.z);
+    return matrix;
+  }
+
+  public static Matrix4f createProjectionMatrix(
+      final float fov, final float aspect, final float zNear, final float zFar) {
+    final Matrix4f matrix = new Matrix4f().identity();
+    matrix.perspective(fov, aspect, zNear, zFar);
+    return matrix;
+  }
 }

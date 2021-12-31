@@ -76,6 +76,10 @@ public abstract class Shader {
     setUniform("uModelMatrix", matrix);
   }
 
+  public void loadViewMatrix(Matrix4f matrix) {
+    setUniform("uViewMatrix", matrix);
+  }
+
   private void setUniform(final String name, final Matrix4f matrix) {
     final int location = getUniformLocation(name);
     final FloatBuffer buffer = MathUtil.buffer(matrix);
