@@ -48,17 +48,13 @@ public class Application {
     meshShader = new MeshShader();
   }
 
-  int time = 0;
-
-  private void update() {
-    time++;
-    camera.setPosition((float) Math.sin(time), 0.0f, 0.0f);
-  }
+  private void update() {}
 
   private void render() {
     meshShader.start();
     meshShader.loadModelMatrix(entity.getModelMatrix());
     meshShader.loadViewMatrix(camera.getViewMatrix());
+    meshShader.loadProjectionMatrix(Window.getProjectionMatrix());
     entity.draw();
     meshShader.end();
   }

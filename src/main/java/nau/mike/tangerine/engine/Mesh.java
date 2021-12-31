@@ -39,16 +39,29 @@ public class Mesh {
     textureIdList.add(texture.getId());
   }
 
+  public void addTexture(
+      final String directory, final String fileName, final String ext, final boolean flipOnLoad) {
+    addTexture(new Texture(directory, fileName, ext, flipOnLoad));
+  }
+
   public void addTexture(final String directory, final String fileName, final String ext) {
-    addTexture(new Texture(directory, fileName, ext));
+    addTexture(directory, fileName, ext, false);
+  }
+
+  public void addTexture(final String fileName, final String ext, final boolean flipOnLoad) {
+    addTexture("", fileName, ext, flipOnLoad);
   }
 
   public void addTexture(final String fileName, final String ext) {
-    addTexture(new Texture("", fileName, ext));
+    addTexture("", fileName, ext);
+  }
+
+  public void addTexture(final String fileName, final boolean flipOnLoad) {
+    addTexture(fileName, "png", flipOnLoad);
   }
 
   public void addTexture(final String fileName) {
-    addTexture(new Texture(fileName, "png"));
+    addTexture(fileName, "png", false);
   }
 
   public void draw() {

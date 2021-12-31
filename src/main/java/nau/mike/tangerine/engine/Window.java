@@ -5,7 +5,9 @@ import nau.mike.tangerine.engine.input.MouseButton;
 import nau.mike.tangerine.engine.input.MousePosition;
 import nau.mike.tangerine.engine.input.MouseScroll;
 import nau.mike.tangerine.engine.utils.ErrorHandler;
+import nau.mike.tangerine.engine.utils.MathUtil;
 import nau.mike.tangerine.engine.utils.TimerUtil;
+import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
@@ -22,9 +24,9 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 @SuppressWarnings("unused")
 public class Window {
 
-  private static float aspectRatio = 0.0f;
-
   private static final boolean debug = true;
+
+  private static Matrix4f projectionMatrix = new Matrix4f().identity();
 
   private long glfwWindow;
   private final GLFWErrorCallback errorCallback;
@@ -50,7 +52,8 @@ public class Window {
     this.windowed = windowed;
     this.errorCallback = GLFWErrorCallback.createPrint(System.err);
 
-    Window.aspectRatio = (float) width / height;
+    Window.projectionMatrix =
+        MathUtil.createProjectionMatrix(75.0f, (float) width / height, 0.1f, 1000.0f);
 
     glfwSetErrorCallback(errorCallback);
 
@@ -190,18 +193,19 @@ public class Window {
     this.width = width;
     this.height = height;
 
-    Window.aspectRatio = (float) width / height;
+    final float aspectRatio = (float) width / height;
+    Window.projectionMatrix = MathUtil.createProjectionMatrix(75.0f, aspectRatio, 0.1f, 1000.0f);
 
     glViewport(0, 0, width, height);
-  }
-
-  public static float getAspectRatio() {
-    return aspectRatio;
   }
 
   public void debugTitle(final String message) {
     if (debug) {
       glfwSetWindowTitle(glfwWindow, title + " | " + message);
     }
+  }
+
+  public static Matrix4f getProjectionMatrix() {
+    return projectionMatrix;
   }
 }

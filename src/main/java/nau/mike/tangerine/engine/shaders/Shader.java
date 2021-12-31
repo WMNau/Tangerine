@@ -76,8 +76,12 @@ public abstract class Shader {
     setUniform("uModelMatrix", matrix);
   }
 
-  public void loadViewMatrix(Matrix4f matrix) {
+  public void loadViewMatrix(final Matrix4f matrix) {
     setUniform("uViewMatrix", matrix);
+  }
+
+  public void loadProjectionMatrix(final Matrix4f matrix) {
+    setUniform("uProjectionMatrix", matrix);
   }
 
   private void setUniform(final String name, final Matrix4f matrix) {
