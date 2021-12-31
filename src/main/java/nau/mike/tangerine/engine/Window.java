@@ -4,6 +4,7 @@ import nau.mike.tangerine.engine.input.Keyboard;
 import nau.mike.tangerine.engine.input.MouseButton;
 import nau.mike.tangerine.engine.input.MousePosition;
 import nau.mike.tangerine.engine.input.MouseScroll;
+import nau.mike.tangerine.engine.utils.ErrorHandler;
 import nau.mike.tangerine.engine.utils.TimerUtil;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
@@ -181,51 +182,7 @@ public class Window {
 
   private void errorCallback(final int code, final long description) {
     if (GLFW_NO_ERROR != code) {
-      String message = "ERROR::";
-      switch (code) {
-        case GLFW_NOT_INITIALIZED:
-          message +=
-              "GLFW_NOT_INITIALIZED\nApplication programmer error. Initialize GLFW before calling any function that requires initialization.";
-          break;
-        case GLFW_NO_CURRENT_CONTEXT:
-          message +=
-              "GLFW_NO_CURRENT_CONTEXT\nApplication programmer error. Ensure a context is current before calling functions that require a current context.";
-          break;
-        case GLFW_INVALID_ENUM:
-          message += "GLFW_INVALID_ENUM\nApplication programmer error. Fix the offending call.";
-          break;
-        case GLFW_INVALID_VALUE:
-          message += "GLFW_INVALID_VALUE\nApplication programmer error. Fix the offending call.";
-          break;
-        case GLFW_OUT_OF_MEMORY:
-          message += "GLFW_OUT_OF_MEMORY\nA bug in GLFW or the underlying operating system.";
-          break;
-        case GLFW_API_UNAVAILABLE:
-          message +=
-              "GLFW_API_UNAVAILABLE\nThe installed graphics driver does not support the requested API, or does not support it via the chosen context creation backend. Below are a few examples.\n\nSome pre-installed Windows graphics drivers do not support OpenGL. AMD only supports OpenGL ES via EGL, while Nvidia and Intel only support it via a WGL or GLX extension. macOS does not provide OpenGL ES at all. The Mesa EGL, OpenGL and OpenGL ES libraries do not interface with the Nvidia binary driver. Older graphics drivers do not support Vulkan.";
-          break;
-        case GLFW_VERSION_UNAVAILABLE:
-          message +=
-              "GLFW_VERSION_UNAVAILABLE\nThe machine does not support your requirements. If your application is sufficiently flexible, downgrade your requirements and try again. Otherwise, inform the user that their machine does not match your requirements.";
-          break;
-        case GLFW_PLATFORM_ERROR:
-          message +=
-              "GLFW_PLATFORM_ERROR\nA bug or configuration error in GLFW, the underlying operating system or its drivers, or a lack of required resources.";
-          break;
-        case GLFW_FORMAT_UNAVAILABLE:
-          message +=
-              "GLFW_FORMAT_UNAVAILABLE\nIf emitted during window creation, one or more hard constraints did not match any of the available pixel formats. If your application is sufficiently flexible, downgrade your requirements and try again. Otherwise, inform the user that their machine does not match your requirements."
-                  + "\n\n"
-                  + "If emitted when querying the clipboard, ignore the error or report it to the user, as appropriate. ";
-          break;
-        case GLFW_NO_WINDOW_CONTEXT:
-          message +=
-              "GLFW_NO_WINDOW_CONTEXT\nApplication programmer error. Fix the offending call.";
-          break;
-        default:
-          message += "UNKNOWN\nAn unknown error occurred";
-      }
-      System.err.println(message);
+      ErrorHandler.getError();
     }
   }
 
