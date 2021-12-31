@@ -1,6 +1,12 @@
 package nau.mike.tangerine.engine.shaders;
 
 import nau.mike.tangerine.engine.utils.FileUtil;
+import nau.mike.tangerine.engine.utils.MathUtil;
+import org.joml.Matrix4f;
+
+import java.nio.FloatBuffer;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.lwjgl.opengl.GL20C.*;
 import static org.lwjgl.opengl.GL32C.GL_GEOMETRY_SHADER;
@@ -12,6 +18,8 @@ public abstract class Shader {
   private final int vertex;
   private final int fragment;
   private final int geometry;
+
+  private final Map<String, Integer> uniformMap;
 
   protected Shader(final String directory, final String fileName) {
     this(directory, fileName, false);
@@ -26,6 +34,7 @@ public abstract class Shader {
   }
 
   protected Shader(final String filePath, final boolean hasGeometry) {
+    this.uniformMap = new HashMap<>();
     this.program = glCreateProgram();
     this.vertex = createShader(filePath + ".vs", GL_VERTEX_SHADER);
     this.fragment = createShader(filePath + ".fs", GL_FRAGMENT_SHADER);
@@ -61,6 +70,25 @@ public abstract class Shader {
     }
 
     glDeleteProgram(program);
+  }
+
+  public void loadModelMatrix(final Matrix4f matrix) {
+    setUniform("uModelMatrix", matrix);
+  }
+
+  private void setUniform(final String name, final Matrix4f matrix) {
+    final int location = getUniformLocation(name);
+    final FloatBuffer buffer = MathUtil.buffer(matrix);
+    glUniformMatrix4fv(location, false, buffer);
+  }
+
+  protected int getUniformLocation(final String name) {
+    if (uniformMap.containsKey(name)) {
+      return uniformMap.get(name);
+    }
+    final int location = glGetUniformLocation(program, name);
+    uniformMap.put(name, location);
+    return location;
   }
 
   private int createShader(final String filePath, final int type) {

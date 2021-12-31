@@ -1,5 +1,6 @@
 package nau.mike.tangerine;
 
+import nau.mike.tangerine.engine.Entity;
 import nau.mike.tangerine.engine.Mesh;
 import nau.mike.tangerine.engine.Window;
 import nau.mike.tangerine.engine.input.Keyboard;
@@ -28,7 +29,7 @@ public class Application {
     1, 2, 3 // second triangle
   };
 
-  private Mesh mesh;
+  private Entity entity;
   private Shader meshShader;
 
   private final Window window;
@@ -38,21 +39,28 @@ public class Application {
   }
 
   private void init() {
-    mesh = new Mesh(new Vertex(vertices, uvs, indices));
+    final Mesh mesh = new Mesh(new Vertex(vertices, uvs, indices));
     mesh.addTexture("awesomeface");
+    entity = new Entity(mesh);
     meshShader = new MeshShader();
   }
 
-  private void update() {}
+  int time = 0;
+
+  private void update() {
+    time++;
+    entity.setPosition((float) Math.sin(time), 0.0f, 0.0f);
+  }
 
   private void render() {
     meshShader.start();
-    mesh.draw();
+    meshShader.loadModelMatrix(entity.getModelMatrix());
+    entity.draw();
     meshShader.end();
   }
 
   private void clean() {
-    mesh.clean();
+    entity.clean();
     meshShader.clean();
   }
 
