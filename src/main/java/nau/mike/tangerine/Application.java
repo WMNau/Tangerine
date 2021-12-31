@@ -15,7 +15,13 @@ public class Application {
     0.5f, 0.5f, 0.0f, // top right
     0.5f, -0.5f, 0.0f, // bottom right
     -0.5f, -0.5f, 0.0f, // bottom left
-    -0.5f, 0.5f, 0.0f
+    -0.5f, 0.5f, 0.0f // top left
+  };
+  private static final float[] uvs = {
+    1.0f, 1.0f, // top right
+    1.0f, 0.0f, // bottom right
+    0.0f, 0.0f, // bottom left
+    0.0f, 1.0f // top left
   };
   private static final int[] indices = {
     0, 1, 3, // first triangle
@@ -32,7 +38,8 @@ public class Application {
   }
 
   private void init() {
-    mesh = new Mesh(new Vertex(vertices, indices));
+    mesh = new Mesh(new Vertex(vertices, uvs, indices));
+    mesh.addTexture("awesomeface");
     meshShader = new MeshShader();
   }
 
