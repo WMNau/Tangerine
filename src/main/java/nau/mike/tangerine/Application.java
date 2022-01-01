@@ -114,15 +114,15 @@ public class Application {
 
   private void render() {
     meshShader.start();
-    meshShader.loadModelMatrix(entity.getModelMatrix());
-    meshShader.loadViewMatrix(camera.getViewMatrix());
-    meshShader.loadProjectionMatrix(Window.getProjectionMatrix());
-    meshShader.loadMaterial(entity.getMaterial());
+    loadLights();
+    entity.draw(meshShader, camera);
+    meshShader.end();
+  }
+
+  private void loadLights() {
     meshShader.loadDirectionalLight(directionalLight, camera.getPosition());
     meshShader.loadSpotLight(spotLight);
     meshShader.loadPointLights(pointLightList);
-    entity.draw();
-    meshShader.end();
   }
 
   private void clean() {

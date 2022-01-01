@@ -3,6 +3,7 @@ package nau.mike.tangerine.engine;
 import imgui.ImGui;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import nau.mike.tangerine.engine.shaders.Shader;
 import nau.mike.tangerine.engine.utils.MathUtil;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -59,7 +60,11 @@ public class Entity {
     mesh.imGui();
   }
 
-  public void draw() {
+  public void draw(final Shader shader, Camera camera) {
+    shader.loadModelMatrix(getModelMatrix());
+    shader.loadViewMatrix(camera.getViewMatrix());
+    shader.loadProjectionMatrix(Window.getProjectionMatrix());
+    shader.loadMaterial(material);
     mesh.draw();
   }
 

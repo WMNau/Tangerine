@@ -151,7 +151,7 @@ public abstract class Shader {
     setUniform(name, value ? 1 : 0);
   }
 
-  private void setUniform(final String name, final int x) {
+  public void setUniform(final String name, final int x) {
     final int location = getUniformLocation(name);
     glUniform1i(location, x);
   }

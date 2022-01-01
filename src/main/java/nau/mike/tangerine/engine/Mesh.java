@@ -12,7 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.lwjgl.opengl.GL15C.*;
-import static org.lwjgl.opengl.GL20C.*;
+import static org.lwjgl.opengl.GL20C.glEnableVertexAttribArray;
+import static org.lwjgl.opengl.GL20C.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30C.*;
 
 @SuppressWarnings("unused")
@@ -32,6 +33,18 @@ public class Mesh {
     this.attributes = mesh.attributes;
     this.count = mesh.count;
     this.enablePolygonMode = mesh.enablePolygonMode;
+  }
+
+  public Mesh(final float[] positions, final float[] uvs) {
+    this.vbos = new ArrayList<>();
+    this.textureIdList = new ArrayList<>();
+    this.attributes = 0;
+    this.vao = createVao();
+    storeDataInAttributeList(positions, 2);
+    storeDataInAttributeList(uvs, 2);
+    glBindVertexArray(0);
+    this.count = positions.length / 2;
+    setEnablePolygonMode(false);
   }
 
   public Mesh(final Vertex vertex, final int[] indices) {
@@ -100,23 +113,28 @@ public class Mesh {
   }
 
   public void draw() {
+    if (enablePolygonMode) {
+      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
+
+    glBindVertexArray(vao);
     int textureCount = 0;
     for (final int textureId : textureIdList) {
       glActiveTexture(GL_TEXTURE2 + textureCount++);
       glBindTexture(GL_TEXTURE_2D, textureId);
     }
 
-    glBindVertexArray(vao);
-    enableVertexAttribArray(true);
-
-    if (enablePolygonMode) {
-      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    }
-
     glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0);
-    enableVertexAttribArray(false);
     glBindVertexArray(0);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  }
+
+  public void drawArrays(final int textureId) {
+    glBindVertexArray(vao);
+    glBindTexture(GL_TEXTURE_2D, textureId);
+    glDrawArrays(GL_TRIANGLES, 0, count);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindVertexArray(0);
   }
 
   public void clean() {
@@ -145,17 +163,8 @@ public class Mesh {
     vbos.add(id);
     final FloatBuffer buffer = MathUtil.buffer(data);
     glBufferData(GL_ARRAY_BUFFER, buffer, GL_STATIC_DRAW);
-    glVertexAttribPointer(attributes++, size, GL_FLOAT, false, 0, 0);
+    glVertexAttribPointer(attributes, size, GL_FLOAT, false, 0, 0);
+    glEnableVertexAttribArray(attributes++);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-  }
-
-  private void enableVertexAttribArray(final boolean enable) {
-    for (int i = 0; i < attributes; i++) {
-      if (enable) {
-        glEnableVertexAttribArray(i);
-      } else {
-        glDisableVertexAttribArray(i);
-      }
-    }
   }
 }

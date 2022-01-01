@@ -14,6 +14,7 @@ import static org.lwjgl.opengl.GL11C.*;
 import static org.lwjgl.opengl.GL12C.GL_CLAMP_TO_EDGE;
 import static org.lwjgl.opengl.GL30C.glGenerateMipmap;
 import static org.lwjgl.stb.STBImage.*;
+import static org.lwjgl.system.MemoryUtil.NULL;
 
 @SuppressWarnings("unused")
 @Getter
@@ -59,6 +60,26 @@ public class Texture {
       this.id = createTexture(filePath, flipOnLoad);
       textureMap.put(filePath.toUpperCase(), this);
     }
+  }
+
+  public Texture(final int width, final int height) {
+    this.width = width;
+    this.height = height;
+    this.id = createTexture(width, height);
+  }
+
+  private int createTexture(final int width, final int height) {
+    final int texture = glGenTextures();
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    return texture;
   }
 
   private int createTexture(final String filePath, final boolean flipOnLoad) {

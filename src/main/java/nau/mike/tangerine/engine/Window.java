@@ -46,6 +46,7 @@ public class Window {
   private final boolean fullscreen;
   private final boolean windowed;
 
+  private Framebuffer framebuffer;
   private final ImGuiLayer imGuiLayer;
 
   public Window(
@@ -87,17 +88,20 @@ public class Window {
 
   public void startFrame() {
     glfwPollEvents();
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     imGuiLayer.newFrame();
+    framebuffer.bind();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   }
 
   public void endFrame() {
+    framebuffer.unbind();
     imGuiLayer.endFrame();
     glfwSwapBuffers(glfwWindow);
     TimerUtil.render();
   }
 
   public void clean() {
+    framebuffer.clean();
     imGuiLayer.dispose();
 
     glfwFreeCallbacks(glfwWindow);
@@ -152,6 +156,9 @@ public class Window {
       glfwSetWindowPos(glfwWindow, x, y);
       Window.windowPosition.x = x;
       Window.windowPosition.y = y;
+      glfwGetFramebufferSize(glfwWindow, pWidth, pHeight);
+      Window.windowSize.x = pWidth.get(0);
+      Window.windowSize.y = pHeight.get(0);
     }
     glfwCursor = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
     glfwSetCursor(glfwWindow, glfwCursor);
@@ -163,10 +170,8 @@ public class Window {
 
     glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
     setCallbacks();
-
-    Window.windowSize.x = width;
-    Window.windowSize.y = height;
     imGuiLayer.init(glfwWindow, true);
+    framebuffer = new Framebuffer();
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -223,9 +228,14 @@ public class Window {
     final float aspectRatio = (float) width / height;
     Window.projectionMatrix = MathUtil.createProjectionMatrix(75.0f, aspectRatio, 0.1f, 1000.0f);
 
-    glViewport(0, 0, width, height);
-    Window.windowSize.x = width;
-    Window.windowSize.y = height;
+    try (final MemoryStack stack = stackPush()) {
+      final IntBuffer w = stack.mallocInt(1);
+      final IntBuffer h = stack.mallocInt(1);
+      glfwGetFramebufferSize(glfwWindow, w, h);
+      glViewport(0, 0, w.get(0), h.get(0));
+      Window.windowSize.x = w.get(0);
+      Window.windowSize.y = h.get(0);
+    }
   }
 
   private void windowPositionCallback(final long window, final int x, final int y) {
