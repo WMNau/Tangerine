@@ -1,5 +1,6 @@
 package nau.mike.tangerine.engine.input;
 
+import lombok.Getter;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFWScrollCallbackI;
 
@@ -8,10 +9,13 @@ import static org.lwjgl.glfw.GLFW.glfwSetScrollCallback;
 @SuppressWarnings("unused")
 public class MouseScroll implements GLFWScrollCallbackI {
 
+  @Getter private static MouseScroll instance;
+
   private static final Vector2f offset = new Vector2f(0.0f);
 
   public MouseScroll(final long window) {
     glfwSetScrollCallback(window, this);
+    MouseScroll.instance = this;
   }
 
   @Override

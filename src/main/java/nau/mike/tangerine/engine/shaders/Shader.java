@@ -1,11 +1,16 @@
 package nau.mike.tangerine.engine.shaders;
 
+import nau.mike.tangerine.engine.Attenuation;
+import nau.mike.tangerine.engine.Light;
+import nau.mike.tangerine.engine.Material;
 import nau.mike.tangerine.engine.utils.FileUtil;
 import nau.mike.tangerine.engine.utils.MathUtil;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 import java.nio.FloatBuffer;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.lwjgl.opengl.GL20C.*;
@@ -82,6 +87,98 @@ public abstract class Shader {
 
   public void loadProjectionMatrix(final Matrix4f matrix) {
     setUniform("uProjectionMatrix", matrix);
+  }
+
+  public void loadMaterial(final Material material) {
+    final String uniform = "uMaterial";
+    setUniform(uniform + ".diffuse", 0);
+    if (null != material.getDiffuseTexture()) {
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, material.getDiffuseTexture().getId());
+    }
+    setUniform(uniform + ".specular", 1);
+    if (null != material.getSpecularTexture()) {
+      glActiveTexture(GL_TEXTURE1);
+      glBindTexture(GL_TEXTURE_2D, material.getSpecularTexture().getId());
+    }
+    setUniform(uniform + ".shininess", material.getShininess());
+  }
+
+  public void loadDirectionalLight(Light light, final Vector3f viewPosition) {
+    final String uniform = "uDirectionalLight";
+    loadLight(uniform, light);
+    setUniform("uViewPosition", viewPosition);
+  }
+
+  public void loadSpotLight(final Light light) {
+    final String uniform = "uSpotLight";
+    loadLight(uniform, light);
+  }
+
+  public void loadPointLights(final List<Light> lightList) {
+    final String uniform = "uPointLights[";
+    int i = 0;
+    for (final Light light : lightList) {
+      loadLight(String.format("%s%d]", uniform, i++), light);
+    }
+  }
+
+  private void loadLight(final String uniform, final Light light) {
+    if (null != light.getPosition()) {
+      setUniform(uniform + ".position", light.getPosition());
+    }
+    if (null != light.getDirection()) {
+      setUniform(uniform + ".direction", light.getDirection());
+    }
+    setUniform(uniform + ".ambient", light.getAmbient());
+    setUniform(uniform + ".diffuse", light.getDiffuse());
+    setUniform(uniform + ".specular", light.getSpecular());
+    if (null != light.getCutoff()) {
+      setUniform(uniform + ".cutoff", light.getCutoff());
+    }
+    if (null != light.getOuterCutoff()) {
+      setUniform(uniform + ".outerCutoff", light.getOuterCutoff());
+    }
+    if (null != light.getAttenuation()) {
+      final Attenuation attenuation = light.getAttenuation();
+      setUniform(uniform + "constant", attenuation.getConstant());
+      setUniform(uniform + "linear", attenuation.getLinear());
+      setUniform(uniform + ".quadratic", attenuation.getQuadratic());
+    }
+  }
+
+  private void setUniform(final String name, final boolean value) {
+    setUniform(name, value ? 1 : 0);
+  }
+
+  private void setUniform(final String name, final int x) {
+    final int location = getUniformLocation(name);
+    glUniform1i(location, x);
+  }
+
+  private void setUniform(final String name, final float x) {
+    final int location = getUniformLocation(name);
+    glUniform1f(location, x);
+  }
+
+  private void setUniform(final String name, final float x, final float y) {
+    final int location = getUniformLocation(name);
+    glUniform2f(location, x, y);
+  }
+
+  private void setUniform(final String name, final float x, final float y, final float z) {
+    final int location = getUniformLocation(name);
+    glUniform3f(location, x, y, z);
+  }
+
+  private void setUniform(
+      final String name, final float x, final float y, final float z, final float w) {
+    final int location = getUniformLocation(name);
+    glUniform4f(location, x, y, z, w);
+  }
+
+  private void setUniform(final String name, final Vector3f vector) {
+    setUniform(name, vector.x, vector.y, vector.z);
   }
 
   private void setUniform(final String name, final Matrix4f matrix) {

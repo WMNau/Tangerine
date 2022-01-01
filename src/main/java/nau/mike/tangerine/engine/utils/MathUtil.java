@@ -1,22 +1,23 @@
 package nau.mike.tangerine.engine.utils;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.List;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MathUtil {
 
-  private MathUtil() {}
-
   public static FloatBuffer buffer(final float[] data) {
-    try (final MemoryStack stack = MemoryStack.stackPush()) {
-      final FloatBuffer buffer = stack.mallocFloat(data.length);
-      buffer.put(data).flip();
-      return buffer;
-    }
+    final FloatBuffer buffer = BufferUtils.createFloatBuffer(data.length);
+    buffer.put(data).flip();
+    return buffer;
   }
 
   public static FloatBuffer buffer(final Matrix4f matrix) {
@@ -28,11 +29,9 @@ public class MathUtil {
   }
 
   public static IntBuffer buffer(int[] data) {
-    try (final MemoryStack stack = MemoryStack.stackPush()) {
-      final IntBuffer buffer = stack.mallocInt(data.length);
-      buffer.put(data).flip();
-      return buffer;
-    }
+    final IntBuffer buffer = BufferUtils.createIntBuffer(data.length);
+    buffer.put(data).flip();
+    return buffer;
   }
 
   public static Matrix4f createModelMatrix(
@@ -62,5 +61,21 @@ public class MathUtil {
     final Matrix4f matrix = new Matrix4f().identity();
     matrix.perspective(fov, aspect, zNear, zFar);
     return matrix;
+  }
+
+  public static float[] toFloatArray(final List<Float> list) {
+    final float[] arr = new float[list.size()];
+    for (int i = 0; i < arr.length; i++) {
+      arr[i] = list.get(i);
+    }
+    return arr;
+  }
+
+  public static int[] toIntArray(final List<Integer> list) {
+    final int[] arr = new int[list.size()];
+    for (int i = 0; i < arr.length; i++) {
+      arr[i] = list.get(i);
+    }
+    return arr;
   }
 }

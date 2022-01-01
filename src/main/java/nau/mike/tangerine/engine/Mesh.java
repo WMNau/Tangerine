@@ -1,5 +1,7 @@
 package nau.mike.tangerine.engine;
 
+import imgui.ImGui;
+import lombok.Setter;
 import nau.mike.tangerine.engine.utils.MathUtil;
 import nau.mike.tangerine.engine.utils.Vertex;
 import org.lwjgl.opengl.GL30;
@@ -13,6 +15,7 @@ import static org.lwjgl.opengl.GL15C.*;
 import static org.lwjgl.opengl.GL20C.*;
 import static org.lwjgl.opengl.GL30C.*;
 
+@SuppressWarnings("unused")
 public class Mesh {
 
   private final int vao;
@@ -20,19 +23,51 @@ public class Mesh {
   private final List<Integer> textureIdList;
   private int attributes;
   private final int count;
-  private boolean enablePolygonMode;
+  @Setter private boolean enablePolygonMode;
 
-  public Mesh(final Vertex vertex) {
+  public Mesh(final Mesh mesh) {
+    this.vao = mesh.vao;
+    this.vbos = mesh.vbos;
+    this.textureIdList = mesh.textureIdList;
+    this.attributes = mesh.attributes;
+    this.count = mesh.count;
+    this.enablePolygonMode = mesh.enablePolygonMode;
+  }
+
+  public Mesh(final Vertex vertex, final int[] indices) {
+    this(vertex, indices, null);
+  }
+
+  public Mesh(final Vertex vertex, final int[] indices, final List<Texture> textureList) {
     this.vbos = new ArrayList<>();
     this.textureIdList = new ArrayList<>();
     this.attributes = 0;
     this.vao = createVao();
-    createIndicesBuffer(vertex.getIndices());
+    createIndicesBuffer(indices);
     storeDataInAttributeList(vertex.getPosition(), 3);
+    storeDataInAttributeList(vertex.getNormals(), 3);
     storeDataInAttributeList(vertex.getUvs(), 2);
     glBindVertexArray(0);
-    this.count = vertex.getIndexCount();
+    this.count = indices.length;
     setEnablePolygonMode(false);
+    if (textureList != null) {
+      textureList.forEach(this::addTexture);
+    }
+  }
+
+  public void imGui() {
+    ImGui.setNextWindowSize(300.0f, 60.0f);
+    ImGui.setNextWindowPos(0.0f, 450.0f);
+    if (ImGui.begin("Mesh")) {
+      String label = "View mesh";
+      if (enablePolygonMode) {
+        label = "View model";
+      }
+      if (ImGui.checkbox(label, enablePolygonMode)) {
+        enablePolygonMode = !enablePolygonMode;
+      }
+      ImGui.end();
+    }
   }
 
   public void addTexture(final Texture texture) {
@@ -67,7 +102,7 @@ public class Mesh {
   public void draw() {
     int textureCount = 0;
     for (final int textureId : textureIdList) {
-      glActiveTexture(GL_TEXTURE0 + textureCount++);
+      glActiveTexture(GL_TEXTURE2 + textureCount++);
       glBindTexture(GL_TEXTURE_2D, textureId);
     }
 
@@ -81,6 +116,7 @@ public class Mesh {
     glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0);
     enableVertexAttribArray(false);
     glBindVertexArray(0);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   }
 
   public void clean() {
@@ -121,9 +157,5 @@ public class Mesh {
         glDisableVertexAttribArray(i);
       }
     }
-  }
-
-  public void setEnablePolygonMode(final boolean enablePolygonMode) {
-    this.enablePolygonMode = enablePolygonMode;
   }
 }

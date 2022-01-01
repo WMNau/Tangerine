@@ -1,11 +1,13 @@
 package nau.mike.tangerine.engine.input;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 import static org.lwjgl.glfw.GLFW.*;
 
 @SuppressWarnings("unused")
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Keys {
-
-  private Keys() {}
 
   public static final int UNKNOWN = GLFW_KEY_UNKNOWN;
   public static final int SPACE = GLFW_KEY_SPACE;

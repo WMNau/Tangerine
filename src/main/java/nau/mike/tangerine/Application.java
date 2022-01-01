@@ -1,60 +1,126 @@
 package nau.mike.tangerine;
 
-import nau.mike.tangerine.engine.Camera;
-import nau.mike.tangerine.engine.Entity;
-import nau.mike.tangerine.engine.Mesh;
-import nau.mike.tangerine.engine.Window;
+import nau.mike.tangerine.engine.*;
 import nau.mike.tangerine.engine.input.Keyboard;
 import nau.mike.tangerine.engine.input.Keys;
 import nau.mike.tangerine.engine.shaders.MeshShader;
 import nau.mike.tangerine.engine.shaders.Shader;
 import nau.mike.tangerine.engine.utils.TimerUtil;
-import nau.mike.tangerine.engine.utils.Vertex;
+import nau.mike.tangerine.entities.Stall;
+import org.joml.Vector3f;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Application {
-
-  private static final float[] vertices = {
-    0.5f, 0.5f, 0.0f, // top right
-    0.5f, -0.5f, 0.0f, // bottom right
-    -0.5f, -0.5f, 0.0f, // bottom left
-    -0.5f, 0.5f, 0.0f // top left
-  };
-  private static final float[] uvs = {
-    1.0f, 1.0f, // top right
-    1.0f, 0.0f, // bottom right
-    0.0f, 0.0f, // bottom left
-    0.0f, 1.0f // top left
-  };
-  private static final int[] indices = {
-    0, 1, 3, // first triangle
-    1, 2, 3 // second triangle
-  };
 
   private Camera camera;
   private Entity entity;
   private Shader meshShader;
 
+  private Light directionalLight;
+  private Light spotLight;
+  private final List<Light> pointLightList;
+
   private final Window window;
 
   public Application() {
     this.window = new Window("Tangerine Game Engine", 1080, 768);
+    this.pointLightList = new ArrayList<>();
   }
 
   private void init() {
     camera = new Camera();
-    final Mesh mesh = new Mesh(new Vertex(vertices, uvs, indices));
-    mesh.addTexture("awesomeface");
-    entity = new Entity(mesh);
     meshShader = new MeshShader();
+    entity =
+        new Stall(
+            new Vector3f(-3.0f, 9.0f, -31.0f),
+            new Vector3f(180.0f, 38.0f, 0.0f),
+            new Vector3f(2.0f));
+    directionalLight =
+        new Light(
+            null,
+            new Vector3f(-0.2f, -1.0f, -0.3f),
+            new Vector3f(0.05f),
+            new Vector3f(0.4f),
+            new Vector3f(0.5f),
+            null,
+            null,
+            null);
+    spotLight =
+        new Light(
+            camera.getPosition(),
+            new Vector3f(0.0f, 0.0f, -1.0f),
+            new Vector3f(0.0f),
+            new Vector3f(1.0f),
+            new Vector3f(1.0f),
+            new Attenuation(1.0f, 0.09f, 0.032f),
+            (float) Math.cos(Math.toRadians(12.5f)),
+            (float) Math.cos(Math.toRadians(15.0f)));
+
+    Light pointLight =
+        new Light(
+            new Vector3f(0.7f, 0.2f, 2.0f),
+            null,
+            new Vector3f(0.5f),
+            new Vector3f(0.8f),
+            new Vector3f(1.0f),
+            new Attenuation(1.0f, 0.09f, 0.032f),
+            null,
+            null);
+    pointLightList.add(pointLight);
+    pointLight =
+        new Light(
+            new Vector3f(2.3f, -3.3f, -4.0f),
+            null,
+            new Vector3f(0.5f),
+            new Vector3f(0.8f),
+            new Vector3f(1.0f),
+            new Attenuation(1.0f, 0.09f, 0.032f),
+            null,
+            null);
+    pointLightList.add(pointLight);
+    pointLight =
+        new Light(
+            new Vector3f(-4.0f, 2.0f, -12.0f),
+            null,
+            new Vector3f(0.5f),
+            new Vector3f(0.8f),
+            new Vector3f(1.0f),
+            new Attenuation(1.0f, 0.09f, 0.032f),
+            null,
+            null);
+    pointLightList.add(pointLight);
+    pointLight =
+        new Light(
+            new Vector3f(0.0f, 0.0f, -3.0f),
+            null,
+            new Vector3f(0.5f),
+            new Vector3f(0.8f),
+            new Vector3f(1.0f),
+            new Attenuation(1.0f, 0.09f, 0.032f),
+            null,
+            null);
+    pointLightList.add(pointLight);
   }
 
-  private void update() {}
+  private void update() {
+    camera.update();
+  }
+
+  public void imGui() {
+    entity.imGui();
+  }
 
   private void render() {
     meshShader.start();
     meshShader.loadModelMatrix(entity.getModelMatrix());
     meshShader.loadViewMatrix(camera.getViewMatrix());
     meshShader.loadProjectionMatrix(Window.getProjectionMatrix());
+    meshShader.loadMaterial(entity.getMaterial());
+    meshShader.loadDirectionalLight(directionalLight, camera.getPosition());
+    meshShader.loadSpotLight(spotLight);
+    meshShader.loadPointLights(pointLightList);
     entity.draw();
     meshShader.end();
   }
@@ -74,6 +140,7 @@ public class Application {
         TimerUtil.update();
       }
       window.startFrame();
+      imGui();
       render();
       window.endFrame();
       if (Keyboard.pressed(Keys.ESCAPE)) {

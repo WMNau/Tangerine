@@ -1,66 +1,54 @@
 package nau.mike.tangerine.engine;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import nau.mike.tangerine.engine.input.Buttons;
+import nau.mike.tangerine.engine.input.MouseButton;
+import nau.mike.tangerine.engine.input.MousePosition;
+import nau.mike.tangerine.engine.input.MouseScroll;
 import nau.mike.tangerine.engine.utils.MathUtil;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 @SuppressWarnings("unused")
+@AllArgsConstructor
+@Data
 public class Camera {
+
+  private static final float MOUSE_POSITION_SENSITIVITY = 0.02f;
+  private static final float MOUSE_SCROLL_SENSITIVITY = 0.2f;
 
   private Vector3f position;
   private Vector3f rotation;
-
-  private Matrix4f viewMatrix;
 
   public Camera() {
     this(new Vector3f(0.0f, 0.0f, 20.0f), new Vector3f(0.0f));
   }
 
-  public Camera(final Vector3f position) {
-    this(position, new Vector3f(0.0f));
-  }
+  public void update() {
+    final float mouseX = MousePosition.getDx();
+    final float mouseY = MousePosition.getDy();
 
-  public Camera(final Vector3f position, final Vector3f rotation) {
-    this.position = position;
-    this.rotation = rotation;
-    this.viewMatrix = MathUtil.createViewMatrix(position, rotation);
-  }
+    if (MouseButton.pressed(Buttons.BUTTON_MIDDLE)) {
+      position.x += mouseX * MOUSE_POSITION_SENSITIVITY;
+      position.y -= mouseY * MOUSE_POSITION_SENSITIVITY;
+    }
+    if (MouseButton.pressed(Buttons.BUTTON_RIGHT)) {
+      rotation.x += mouseY * MOUSE_POSITION_SENSITIVITY;
+      rotation.y += mouseX * MOUSE_POSITION_SENSITIVITY;
 
-  public Vector3f getPosition() {
-    return position;
-  }
+      final float maxPitch = 89.0f;
+      if (rotation.x > maxPitch) {
+        rotation.x = maxPitch;
+      } else if (rotation.x < -maxPitch) {
+        rotation.x = -maxPitch;
+      }
+    }
 
-  public void setPosition(final Vector3f position) {
-    this.position = position;
-    this.viewMatrix = MathUtil.createViewMatrix(position, rotation);
-  }
-
-  public void setPosition(final float x, final float y, final float z) {
-    setPosition(new Vector3f(x, y, z));
-  }
-
-  public void setPosition(final float xyz) {
-    setPosition(xyz, xyz, xyz);
-  }
-
-  public Vector3f getRotation() {
-    return rotation;
-  }
-
-  public void setRotation(final Vector3f rotation) {
-    this.rotation = rotation;
-    this.viewMatrix = MathUtil.createViewMatrix(position, rotation);
-  }
-
-  public void setRotation(final float x, final float y, final float z) {
-    setRotation(new Vector3f(x, y, z));
-  }
-
-  public void setRotation(final float xyz) {
-    setRotation(xyz, xyz, xyz);
+    position.z += MouseScroll.getY() * MOUSE_SCROLL_SENSITIVITY;
   }
 
   public Matrix4f getViewMatrix() {
-    return viewMatrix;
+    return MathUtil.createViewMatrix(position, this.rotation);
   }
 }

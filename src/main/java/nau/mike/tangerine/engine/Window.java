@@ -1,5 +1,6 @@
 package nau.mike.tangerine.engine;
 
+import lombok.Getter;
 import nau.mike.tangerine.engine.input.Keyboard;
 import nau.mike.tangerine.engine.input.MouseButton;
 import nau.mike.tangerine.engine.input.MousePosition;
@@ -7,7 +8,9 @@ import nau.mike.tangerine.engine.input.MouseScroll;
 import nau.mike.tangerine.engine.utils.ErrorHandler;
 import nau.mike.tangerine.engine.utils.MathUtil;
 import nau.mike.tangerine.engine.utils.TimerUtil;
+import nau.mike.tangerine.imgui.ImGuiLayer;
 import org.joml.Matrix4f;
+import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
@@ -22,11 +25,15 @@ import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 @SuppressWarnings("unused")
+@Getter
 public class Window {
 
   private static final boolean debug = true;
 
-  private static Matrix4f projectionMatrix = new Matrix4f().identity();
+  @Getter private static final Vector2i windowSize = new Vector2i();
+  @Getter private static final Vector2i windowPosition = new Vector2i();
+
+  @Getter private static Matrix4f projectionMatrix = new Matrix4f().identity();
 
   private long glfwWindow;
   private final GLFWErrorCallback errorCallback;
@@ -38,6 +45,8 @@ public class Window {
   private int height;
   private final boolean fullscreen;
   private final boolean windowed;
+
+  private final ImGuiLayer imGuiLayer;
 
   public Window(
       final String title,
@@ -60,6 +69,7 @@ public class Window {
     if (!glfwInit()) throw new IllegalStateException("Unable to initialize GLFW");
 
     setWindowHints();
+    imGuiLayer = new ImGuiLayer();
     init();
   }
 
@@ -78,14 +88,18 @@ public class Window {
   public void startFrame() {
     glfwPollEvents();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    imGuiLayer.newFrame();
   }
 
   public void endFrame() {
+    imGuiLayer.endFrame();
     glfwSwapBuffers(glfwWindow);
     TimerUtil.render();
   }
 
   public void clean() {
+    imGuiLayer.dispose();
+
     glfwFreeCallbacks(glfwWindow);
     glfwDestroyCursor(glfwCursor);
     glfwDestroyWindow(glfwWindow);
@@ -133,10 +147,11 @@ public class Window {
       final IntBuffer pHeight = stack.mallocInt(1);
 
       glfwGetWindowSize(glfwWindow, pWidth, pHeight);
-      glfwSetWindowPos(
-          glfwWindow,
-          (glfwVidMode.width() - pWidth.get(0)) / 2,
-          (glfwVidMode.height() - pHeight.get(0)) / 2);
+      final int x = (glfwVidMode.width() - pWidth.get(0)) / 2;
+      final int y = (glfwVidMode.height() - pHeight.get(0)) / 2;
+      glfwSetWindowPos(glfwWindow, x, y);
+      Window.windowPosition.x = x;
+      Window.windowPosition.y = y;
     }
     glfwCursor = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
     glfwSetCursor(glfwWindow, glfwCursor);
@@ -148,6 +163,17 @@ public class Window {
 
     glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
     setCallbacks();
+
+    Window.windowSize.x = width;
+    Window.windowSize.y = height;
+    imGuiLayer.init(glfwWindow, true);
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
   }
 
   private void setWindowHints() {
@@ -181,6 +207,7 @@ public class Window {
 
     glfwSetErrorCallback(this::errorCallback);
     glfwSetFramebufferSizeCallback(glfwWindow, this::frameBufferSizeCallback);
+    glfwSetWindowPosCallback(glfwWindow, this::windowPositionCallback);
   }
 
   private void errorCallback(final int code, final long description) {
@@ -197,15 +224,18 @@ public class Window {
     Window.projectionMatrix = MathUtil.createProjectionMatrix(75.0f, aspectRatio, 0.1f, 1000.0f);
 
     glViewport(0, 0, width, height);
+    Window.windowSize.x = width;
+    Window.windowSize.y = height;
+  }
+
+  private void windowPositionCallback(final long window, final int x, final int y) {
+    Window.windowPosition.x = x;
+    Window.windowPosition.y = y;
   }
 
   public void debugTitle(final String message) {
     if (debug) {
       glfwSetWindowTitle(glfwWindow, title + " | " + message);
     }
-  }
-
-  public static Matrix4f getProjectionMatrix() {
-    return projectionMatrix;
   }
 }

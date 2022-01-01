@@ -1,5 +1,6 @@
 package nau.mike.tangerine.engine.input;
 
+import lombok.Getter;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFWCursorPosCallbackI;
 
@@ -9,7 +10,7 @@ import static org.lwjgl.glfw.GLFW.glfwSetCursorPosCallback;
 @SuppressWarnings("unused")
 public class MousePosition implements GLFWCursorPosCallbackI {
 
-  private static final Vector2f position = new Vector2f(0.0f);
+  @Getter private static final Vector2f position = new Vector2f(0.0f);
   private static final Vector2f lastPosition = new Vector2f(0.0f);
 
   private static boolean inWindow = false;
@@ -53,10 +54,6 @@ public class MousePosition implements GLFWCursorPosCallbackI {
 
   public static String lastPositionString() {
     return String.format("Last Mouse Position( %f, %f)", getDx(), getDy());
-  }
-
-  public static Vector2f getPosition() {
-    return position;
   }
 
   public static boolean isInWindow() {

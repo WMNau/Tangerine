@@ -1,11 +1,13 @@
 package nau.mike.tangerine.engine.input;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 import static org.lwjgl.glfw.GLFW.*;
 
 @SuppressWarnings("unused")
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Buttons {
-
-  private Buttons() {}
 
   public static final int BUTTON1 = GLFW_MOUSE_BUTTON_1;
   public static final int BUTTON2 = GLFW_MOUSE_BUTTON_2;

@@ -1,6 +1,10 @@
 package nau.mike.tangerine.engine.utils;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 @SuppressWarnings("unused")
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TimerUtil {
   private static long lastTime;
   private static final float NS;
@@ -18,8 +22,6 @@ public class TimerUtil {
     updates = 0;
     frames = 0;
   }
-
-  private TimerUtil() {}
 
   public static void start() {
     final long now = System.nanoTime();

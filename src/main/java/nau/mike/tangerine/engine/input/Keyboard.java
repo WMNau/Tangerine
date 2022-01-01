@@ -1,5 +1,6 @@
 package nau.mike.tangerine.engine.input;
 
+import lombok.Getter;
 import org.lwjgl.glfw.GLFWKeyCallbackI;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -7,11 +8,14 @@ import static org.lwjgl.glfw.GLFW.*;
 @SuppressWarnings("unused")
 public class Keyboard implements GLFWKeyCallbackI {
 
+  @Getter private static Keyboard instance;
+
   private static long window = -1;
 
   public Keyboard(long window) {
     Keyboard.window = window;
     glfwSetKeyCallback(window, this);
+    Keyboard.instance = this;
   }
 
   @Override

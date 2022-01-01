@@ -1,5 +1,6 @@
 package nau.mike.tangerine.engine.input;
 
+import lombok.Getter;
 import org.lwjgl.glfw.GLFWMouseButtonCallbackI;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -7,11 +8,14 @@ import static org.lwjgl.glfw.GLFW.*;
 @SuppressWarnings("unused")
 public class MouseButton implements GLFWMouseButtonCallbackI {
 
+  @Getter private static MouseButton instance;
+
   private static long window = -1;
 
   public MouseButton(long window) {
     MouseButton.window = window;
     glfwSetMouseButtonCallback(window, this);
+    MouseButton.instance = this;
   }
 
   @Override

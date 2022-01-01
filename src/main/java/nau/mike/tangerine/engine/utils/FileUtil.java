@@ -1,14 +1,16 @@
 package nau.mike.tangerine.engine.utils;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class FileUtil {
-
-  private FileUtil() {}
 
   public static String getSource(final String filePath) {
     try {
