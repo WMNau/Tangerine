@@ -1,6 +1,7 @@
 package nau.mike.tangerine.engine.shaders;
 
 import nau.mike.tangerine.engine.Attenuation;
+import nau.mike.tangerine.engine.Camera;
 import nau.mike.tangerine.engine.Light;
 import nau.mike.tangerine.engine.Material;
 import nau.mike.tangerine.engine.utils.FileUtil;
@@ -104,10 +105,10 @@ public abstract class Shader {
     setUniform(uniform + ".shininess", material.getShininess());
   }
 
-  public void loadDirectionalLight(Light light, final Vector3f viewPosition) {
+  public void loadDirectionalLight(Light light) {
     final String uniform = "uDirectionalLight";
     loadLight(uniform, light);
-    setUniform("uViewPosition", viewPosition);
+    setUniform("uViewPosition", Camera.getPosition());
   }
 
   public void loadSpotLight(final Light light) {
@@ -117,9 +118,8 @@ public abstract class Shader {
 
   public void loadPointLights(final List<Light> lightList) {
     final String uniform = "uPointLights[";
-    int i = 0;
-    for (final Light light : lightList) {
-      loadLight(String.format("%s%d]", uniform, i++), light);
+    for (int i = 0; i < Math.min(4, lightList.size()); i++) {
+      loadLight(String.format("%s%d]", uniform, i), lightList.get(i));
     }
   }
 

@@ -1,8 +1,5 @@
 package nau.mike.tangerine.engine;
 
-import nau.mike.tangerine.engine.Mesh;
-import nau.mike.tangerine.engine.Texture;
-import nau.mike.tangerine.engine.Window;
 import nau.mike.tangerine.engine.shaders.ScreenShader;
 import nau.mike.tangerine.engine.shaders.Shader;
 import org.lwjgl.system.MemoryStack;

@@ -60,9 +60,9 @@ public class Entity {
     mesh.imGui();
   }
 
-  public void draw(final Shader shader, Camera camera) {
+  public void draw(final Shader shader) {
     shader.loadModelMatrix(getModelMatrix());
-    shader.loadViewMatrix(camera.getViewMatrix());
+    shader.loadViewMatrix(Camera.getViewMatrix());
     shader.loadProjectionMatrix(Window.getProjectionMatrix());
     shader.loadMaterial(material);
     mesh.draw();

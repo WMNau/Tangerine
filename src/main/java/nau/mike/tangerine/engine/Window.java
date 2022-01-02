@@ -88,9 +88,9 @@ public class Window {
 
   public void startFrame() {
     glfwPollEvents();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     imGuiLayer.newFrame();
     framebuffer.bind();
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   }
 
   public void endFrame() {
@@ -131,6 +131,40 @@ public class Window {
   }
 
   private void init() {
+    createGlfwWindow();
+    glfwCursor = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
+    glfwSetCursor(glfwWindow, glfwCursor);
+    glfwMakeContextCurrent(glfwWindow);
+    glfwSwapInterval(1);
+
+    glfwShowWindow(glfwWindow);
+    GL.createCapabilities();
+
+    setCallbacks();
+    enableGraphics();
+
+    imGuiLayer.init(glfwWindow, true);
+    framebuffer = new Framebuffer();
+  }
+
+  private void enableGraphics() {
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+  }
+
+  private void createGlfwWindow() {
+    final long monitor = decideMonitorOnFullscreen();
+    glfwWindow = glfwCreateWindow(width, height, title, monitor, NULL);
+    if (glfwWindow == NULL) throw new IllegalStateException("Failed to create the GLFW window");
+    centerGlfwWindow();
+  }
+
+  private long decideMonitorOnFullscreen() {
     final long glfwMonitor = glfwGetPrimaryMonitor();
     glfwVidMode = glfwGetVideoMode(glfwMonitor);
     long monitor = NULL;
@@ -144,8 +178,10 @@ public class Window {
       monitor = glfwMonitor;
       setVidModeWindowHints();
     }
-    glfwWindow = glfwCreateWindow(width, height, title, monitor, NULL);
-    if (glfwWindow == NULL) throw new IllegalStateException("Failed to create the GLFW window");
+    return monitor;
+  }
+
+  private void centerGlfwWindow() {
     try (final MemoryStack stack = stackPush()) {
       final IntBuffer pWidth = stack.mallocInt(1);
       final IntBuffer pHeight = stack.mallocInt(1);
@@ -160,25 +196,6 @@ public class Window {
       Window.windowSize.x = pWidth.get(0);
       Window.windowSize.y = pHeight.get(0);
     }
-    glfwCursor = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
-    glfwSetCursor(glfwWindow, glfwCursor);
-    glfwMakeContextCurrent(glfwWindow);
-    glfwSwapInterval(1);
-
-    glfwShowWindow(glfwWindow);
-    GL.createCapabilities();
-
-    glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
-    setCallbacks();
-    imGuiLayer.init(glfwWindow, true);
-    framebuffer = new Framebuffer();
-
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glFrontFace(GL_CCW);
   }
 
   private void setWindowHints() {

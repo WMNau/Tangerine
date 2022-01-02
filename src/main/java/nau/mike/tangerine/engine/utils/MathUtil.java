@@ -34,6 +34,20 @@ public class MathUtil {
     return buffer;
   }
 
+  public static float clamp(final float value, final float min, final float max) {
+    return Math.min(Math.max(min, value), max);
+  }
+
+  public static float revolve(final float value, final float min, final float max) {
+    float result = value;
+    if (value < min) {
+      result = max;
+    } else if (value > max) {
+      result = min;
+    }
+    return result;
+  }
+
   public static Matrix4f createModelMatrix(
       final Vector3f position, final Vector3f rotation, final Vector3f scale) {
     final Matrix4f matrix = new Matrix4f().identity();
@@ -52,7 +66,7 @@ public class MathUtil {
         .rotateX((float) Math.toRadians(rotation.x))
         .rotateY((float) Math.toRadians(rotation.y))
         .rotateZ((float) Math.toRadians(rotation.z));
-    matrix.translation(-position.x, -position.y, -position.z);
+    matrix.translate(-position.x, -position.y, -position.z);
     return matrix;
   }
 

@@ -8,10 +8,14 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.lwjgl.opengl.GL11C.*;
 import static org.lwjgl.opengl.GL12C.GL_CLAMP_TO_EDGE;
+import static org.lwjgl.opengl.GL12C.GL_TEXTURE_WRAP_R;
+import static org.lwjgl.opengl.GL13C.GL_TEXTURE_CUBE_MAP;
+import static org.lwjgl.opengl.GL13C.GL_TEXTURE_CUBE_MAP_POSITIVE_X;
 import static org.lwjgl.opengl.GL30C.glGenerateMipmap;
 import static org.lwjgl.stb.STBImage.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
@@ -25,6 +29,7 @@ public class Texture {
   private final int id;
   private int width;
   private int height;
+  private int nrChannel;
 
   public Texture(final String fileName, final String ext) {
     this(fileName, ext, true);
@@ -68,27 +73,65 @@ public class Texture {
     this.id = createTexture(width, height);
   }
 
+  public Texture(final List<String> textureFileNameList, final boolean flipOnLoad) {
+    this.id = createTexture(textureFileNameList, flipOnLoad);
+  }
+
   private int createTexture(final int width, final int height) {
     final int texture = glGenTextures();
     glBindTexture(GL_TEXTURE_2D, texture);
-
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    setTextureParams(GL_TEXTURE_2D);
     return texture;
   }
 
   private int createTexture(final String filePath, final boolean flipOnLoad) {
     final int texture = glGenTextures();
+    final ByteBuffer buffer = getImageBuffer(filePath, flipOnLoad);
+
+    glBindTexture(GL_TEXTURE_2D, texture);
+    final int format = nrChannel == 3 || nrChannel == 4 ? GL_RGBA : GL_RGB;
+
+    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, buffer);
+    setTextureParams(GL_TEXTURE_2D);
+
+    stbi_image_free(buffer);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    return texture;
+  }
+
+  private int createTexture(final List<String> textureFileNameList, final boolean flipOnLoad) {
+    final int texture = glGenTextures();
+    ByteBuffer buffer;
+    int i = 0;
+    for (final String fileName : textureFileNameList) {
+      final String filePath = String.format("/textures/skybox/%s", fileName);
+      buffer = getImageBuffer(filePath, flipOnLoad);
+
+      glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
+      glTexImage2D(
+          GL_TEXTURE_CUBE_MAP_POSITIVE_X + i++,
+          0,
+          GL_RGBA,
+          width,
+          height,
+          0,
+          GL_RGBA,
+          GL_UNSIGNED_BYTE,
+          buffer);
+      setTextureParams(GL_TEXTURE_CUBE_MAP);
+      glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+      stbi_image_free(buffer);
+    }
+    return texture;
+  }
+
+  private ByteBuffer getImageBuffer(final String filePath, final boolean flipOnLoad) {
     try (final MemoryStack stack = MemoryStack.stackPush()) {
+      final URL url = FileUtil.getUrl(filePath);
       final IntBuffer w = stack.mallocInt(1);
       final IntBuffer h = stack.mallocInt(1);
       final IntBuffer c = stack.mallocInt(1);
-      final URL url = FileUtil.getUrl(filePath);
       stbi_set_flip_vertically_on_load(flipOnLoad);
       final ByteBuffer buffer = stbi_load(url.getFile(), w, h, c, 4);
       if (null == buffer) {
@@ -97,22 +140,16 @@ public class Texture {
 
       this.width = w.get(0);
       this.height = h.get(0);
-      final int nrChannel = c.get(0);
-
-      glBindTexture(GL_TEXTURE_2D, texture);
-      final int format = nrChannel == 3 || nrChannel == 4 ? GL_RGBA : GL_RGB;
-
-      glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, buffer);
-      glGenerateMipmap(GL_TEXTURE_2D);
-
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-      stbi_image_free(buffer);
-      glBindTexture(GL_TEXTURE_2D, 0);
+      this.nrChannel = c.get(0);
+      return buffer;
     }
-    return texture;
+  }
+
+  private void setTextureParams(final int type) {
+    glGenerateMipmap(type);
+    glTexParameteri(type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(type, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   }
 }

@@ -51,7 +51,7 @@ in vec3 vNormal;
 in vec3 vWorldPosition;
 in vec2 vUvs;
 
-uniform sampler2D textureSampler;
+uniform sampler2D uTextureSampler;
 
 uniform Material uMaterial;
 uniform DirectionalLight uDirectionalLight;

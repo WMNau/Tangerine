@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.joml.Vector3f;
 
+@SuppressWarnings("unused")
 @AllArgsConstructor
 @Data
 public class Light {

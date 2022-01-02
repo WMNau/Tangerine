@@ -47,6 +47,17 @@ public class Mesh {
     setEnablePolygonMode(false);
   }
 
+  public Mesh(final float[] positions) {
+    this.vbos = new ArrayList<>();
+    this.textureIdList = new ArrayList<>();
+    this.attributes = 0;
+    this.vao = createVao();
+    storeDataInAttributeList(positions, 3);
+    glBindVertexArray(0);
+    this.count = positions.length / 3;
+    setEnablePolygonMode(false);
+  }
+
   public Mesh(final Vertex vertex, final int[] indices) {
     this(vertex, indices, null);
   }
@@ -130,8 +141,13 @@ public class Mesh {
   }
 
   public void drawArrays(final int textureId) {
+    drawArrays(textureId, GL_TEXTURE_2D);
+  }
+
+  public void drawArrays(final int textureId, final int textureType) {
     glBindVertexArray(vao);
-    glBindTexture(GL_TEXTURE_2D, textureId);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(textureType, textureId);
     glDrawArrays(GL_TRIANGLES, 0, count);
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindVertexArray(0);

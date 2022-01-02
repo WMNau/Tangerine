@@ -1,9 +1,8 @@
-package nau.mike.tangerine.engine;
+package nau.mike.tangerine.engine.utils;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import nau.mike.tangerine.engine.utils.MathUtil;
-import nau.mike.tangerine.engine.utils.Vertex;
+import nau.mike.tangerine.engine.Mesh;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.assimp.AIFace;
 import org.lwjgl.assimp.AIMesh;

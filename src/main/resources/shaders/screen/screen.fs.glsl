@@ -2,11 +2,11 @@
 
 in vec2 vUvs;
 
-uniform sampler2D textureSampler;
+uniform sampler2D uTextureSampler;
 
 out vec4 fColor;
 
 void main()
 {
-    fColor = texture(textureSampler, vUvs);
+    fColor = texture(uTextureSampler, vUvs);
 }
