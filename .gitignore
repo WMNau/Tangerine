@@ -76,4 +76,4 @@ fabric.properties
 .gradle
 build
 
-*.ini
+imgui.ini
